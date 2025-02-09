@@ -4,7 +4,6 @@ export interface TeamMember {
   email: string;
   phoneNo: string;
   role: string;
-  avatar?: string;
 }
 
 const teamMembers: TeamMember[] = [

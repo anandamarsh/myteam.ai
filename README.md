@@ -25,20 +25,49 @@ The App uses `react hooks` for state management and `useEffect` for calling the 
 
 # Backend
 
+<div style=" color: rgb(0, 0, 0); background-color: rgb(255, 200, 155); padding: 10px; border-radius: 5px; border-left: 5px solid rgb(255, 200, 155);">
+⚠️ <strong>Note:</strong><br>
+I have been coding in Node.js for the past 10 years. I have never coded in Python / Django before. This entire code has been generated using `Cursor` using `claude-3.5-sonnet` with almost no manual inspection of the code.
+</div>
+
 The backend stack consists of:
 
 - Python
 - Django
 - Django REST framework
 
+## Architecture
+
 The backend is a RESTful API that uses Django REST framework to create the API endpoints. The API endpoints are defined in the `urls.py` file. The API endpoints are used by the frontend to fetch the list of team members, add a new team member, update a team member, and delete a team member.
 
 # Database
 
-For simplicity of this exercise, the app uses an in-memory database (Django's default database). A more robust / production-ready solution would use a PostgreSQL database.
+I am using `sqlite3` for the database. The database is defined in the `models.py` file. The database is used to store the list of team members.
 
 # Testing
 
-The app uses `pytest` for testing. The tests are defined in the `tests` directory. The tests are used to test the API endpoints.
+The app uses `Behave` BDD framework for testing. The tests are defined in the `features` directory. The tests are used to test the API endpoints.
 
-App testing is not implemented for this exercise.
+# Running the app
+
+First run the server
+
+```bash
+# from myteam_server directory
+python3 manage.py runserver
+```
+
+# Running the tests
+
+```bash
+# from myteam_server directory
+python3 manage.py test
+python3 manage.py behave
+```
+
+And then run the client:
+
+```bash
+# from myteam_spa directory
+npm run start
+```
