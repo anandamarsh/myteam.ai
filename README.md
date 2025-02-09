@@ -25,10 +25,8 @@ The App uses `react hooks` for state management and `useEffect` for calling the 
 
 # Backend
 
-<div style=" color: rgb(0, 0, 0); background-color: rgb(255, 200, 155); padding: 10px; border-radius: 5px; border-left: 5px solid rgb(255, 200, 155);">
-⚠️ <strong>Note:</strong><br>
-I have been coding in Node.js for the past 10 years. I have never coded in Python / Django before. This entire code has been generated using `Cursor` using `claude-3.5-sonnet` with almost no manual inspection of the code.
-</div>
+> 🚀 **Note**  
+> I have been coding in Node.js for the past 10 years. I have never coded in Python / Django before. This entire code has been generated using `Cursor` using `claude-3.5-sonnet` with almost no manual inspection of the code.
 
 The backend stack consists of:
 
