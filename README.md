@@ -1,13 +1,9 @@
+> 🚀 **Note**  
+> It took me about 6 hrs to create everything end-to-end. This was possible only because I was using `Cursor` using `claude-3.5-sonnet`. I manually inspected the frontend (React) part and changed a few files. Backend was compltely since this is the first time I am using Python / Django (I am a nodejs programmer). If I had more time,I would have manually inspected the code further and added more tests
+
 # myteam.ai
 
-My team is a fullstack (React + Python / Django) app that helps you add / remove people into your team.
-
-## Features
-
-- Add a team member
-- Remove a team member
-- View all team members
-- Edit a team member
+MyTeam is a fullstack (React + Python / Django) app that helps you add / remove people into your team.
 
 # Frontend
 
@@ -19,9 +15,9 @@ The frontend stack consists of:
 
 ## Architecture
 
-The FE is SPA. `config.ts` contains the API endpoint for the backend. Upon starting up, the app hits the `/api/v1/members` endpoint to fetch the list of team members and displays them in a list. Upon clicking on a team member, the app displays the selected team member's details. The user can update the deatils and save them (the app calls the `/api/v1/members/<id>` endpoint to update the team member). The user can also delete a team member (the app calls the `/api/v1/members/<id>` endpoint to delete the team member). The user can also add / create a new team member (the app calls the `/api/v1/members` endpoint to add the new team member).
+The FE is SPA. `config.ts` contains the API endpoint for the backend. Upon starting up, the app hits the `/api/v1/members` endpoint to fetch the list of team members and displays them in a list. Upon clicking on a team member, the app displays the selected team member's details. The user can update the details and save them (the app calls the `/api/v1/members/<id>` endpoint to update the team member). The user can also delete a team member (the app calls the `/api/v1/members/<id>` endpoint to delete the team member). The user can also add / create a new team member (the app calls the `/api/v1/members` endpoint to add the new team member).
 
-The App uses `react hooks` for state management and `useEffect` for calling the API endpoints. Instead of using a state management library like `redux`, the app uses the `useContext` hook to manage the state of the app.
+The App uses `react hooks` for state management and the hook uses `useEffect` for calling the API endpoints. No state management library like `redux` was required for a simple app like this.
 
 # Backend
 
@@ -36,7 +32,7 @@ The backend stack consists of:
 
 ## Architecture
 
-The backend is a RESTful API that uses Django REST framework to create the API endpoints. The API endpoints are defined in the `urls.py` file. The API endpoints are used by the frontend to fetch the list of team members, add a new team member, update a team member, and delete a team member.
+The backend is a RESTful API that uses Django REST framework to create the API endpoints. The API endpoints are defined in the `urls.py` and `views.py` file. The API endpoints are used by the frontend to fetch the list of team members, add a new team member, update a team member, and delete a team member.
 
 # Database
 
@@ -55,7 +51,7 @@ First run the server
 python3 manage.py runserver
 ```
 
-# Running the tests
+## Running the server tests
 
 ```bash
 # from myteam_server directory
@@ -68,4 +64,11 @@ And then run the client:
 ```bash
 # from myteam_spa directory
 npm run start
+```
+
+## Running the client tests
+
+```bash
+# from myteam_spa directory
+npm run test
 ```

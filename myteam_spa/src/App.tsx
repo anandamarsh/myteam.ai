@@ -1,35 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Typography from "@mui/material/Typography";
-import Member from "./Member";
-import MemberDetails from "./MemberDetails";
-import { TeamMember } from "../types/TeamMember";
-import { api } from "../services/api";
+import Member from "./components/Member";
+import MemberDetails from "./components/MemberDetails";
+import { TeamMember } from "./types/TeamMember";
 import AddIcon from "@mui/icons-material/Add";
-import { StyledFab } from "./styled";
+import { StyledFab } from "./components/styled";
+import { useMembers } from "./hooks/useMembers";
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<"list" | "details">("list");
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
-  const [members, setMembers] = useState<TeamMember[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadMembers();
-  }, []);
-
-  const loadMembers = async () => {
-    try {
-      const data = await api.getMembers();
-      setMembers(data);
-      setError(null);
-    } catch (err) {
-      setError("Failed to load team members");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { members, loading, error, loadMembers } = useMembers();
 
   if (loading) return <Typography>Loading...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
@@ -38,10 +19,12 @@ const App: React.FC = () => {
     return (
       <MemberDetails
         member={selectedMember}
-        onClose={() => {
+        onClose={(wasModified = false) => {
           setCurrentView("list");
           setSelectedMember(null);
-          loadMembers();
+          if (wasModified) {
+            loadMembers();
+          }
         }}
       />
     );
@@ -50,10 +33,10 @@ const App: React.FC = () => {
   return (
     <div style={{ margin: "1rem" }}>
       <Typography variant="h5">Team Members</Typography>
-      <Typography variant="h6">
+      <Typography variant="h6" data-testid="member-count">
         You have {members.length} team members
       </Typography>
-      <div style={{ marginTop: "2rem" }}>
+      <div style={{ marginTop: "2rem" }} data-testid="member-list">
         {members.map((member) => (
           <Member
             key={member.id}
@@ -66,6 +49,7 @@ const App: React.FC = () => {
         ))}
       </div>
       <StyledFab
+        data-testid="add-member-button"
         onClick={() => {
           setSelectedMember(null);
           setCurrentView("details");

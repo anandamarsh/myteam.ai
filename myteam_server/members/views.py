@@ -6,18 +6,6 @@ from .serializers import TeamMemberSerializer
 
 # Create your views here.
 
-# In-memory storage
-MEMBERS = [
-    {
-        "id": 1,
-        "first_name": "John",
-        "last_name": "Doe",
-        "email": "john@example.com",
-        "phone_no": "1234567890",
-        "role": "Admin"
-    }
-]
-
 class TeamMemberViewSet(viewsets.ViewSet):
     def list(self, request):
         queryset = TeamMember.objects.all()

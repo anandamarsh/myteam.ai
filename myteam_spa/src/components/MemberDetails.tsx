@@ -14,7 +14,7 @@ import { api } from "../services/api";
 
 interface Props {
   member?: TeamMember | null;
-  onClose: () => void;
+  onClose: (wasModified?: boolean) => void;
 }
 
 const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
@@ -34,7 +34,7 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
       } else {
         await api.createMember(formData);
       }
-      onClose();
+      onClose(true);
     } catch (error) {
       console.error("Failed to save member:", error);
     }
@@ -59,6 +59,7 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
       />
       <form
         onSubmit={handleSubmit}
+        data-testid="member-form"
         style={{
           display: "flex",
           flexDirection: "column",
@@ -74,6 +75,7 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
           onChange={(e) =>
             setFormData({ ...formData, firstName: e.target.value })
           }
+          data-testid="firstName-input"
         />
         <TextField
           label="Last Name"
@@ -82,6 +84,7 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
           onChange={(e) =>
             setFormData({ ...formData, lastName: e.target.value })
           }
+          data-testid="lastName-input"
         />
         <TextField
           label="Email"
@@ -89,6 +92,7 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
           fullWidth
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          data-testid="email-input"
         />
         <TextField
           label="Phone Number"
@@ -97,6 +101,7 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
           onChange={(e) =>
             setFormData({ ...formData, phoneNo: e.target.value })
           }
+          data-testid="phoneNo-input"
         />
         <FormControl>
           <FormLabel>Role</FormLabel>
@@ -106,12 +111,12 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
           >
             <FormControlLabel
               value="Regular"
-              control={<Radio />}
+              control={<Radio data-testid="role-regular-radio" />}
               label="Regular - Can't delete members"
             />
             <FormControlLabel
               value="Admin"
-              control={<Radio />}
+              control={<Radio data-testid="role-admin-radio" />}
               label="Admin - Can delete members"
             />
           </RadioGroup>
@@ -129,10 +134,11 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
               <Button
                 variant="contained"
                 color="error"
+                data-testid="delete-button"
                 onClick={async () => {
                   try {
                     await api.deleteMember(member.id, member.email);
-                    onClose();
+                    onClose(true);
                   } catch (error) {
                     alert(
                       error instanceof Error
@@ -147,10 +153,19 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
             )}
           </div>
           <div style={{ display: "flex", gap: "1rem" }}>
-            <Button onClick={onClose} variant="outlined">
+            <Button
+              onClick={() => onClose(false)}
+              variant="outlined"
+              data-testid="cancel-button"
+            >
               Cancel
             </Button>
-            <Button type="submit" variant="contained" color="primary">
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              data-testid="save-button"
+            >
               Save
             </Button>
           </div>

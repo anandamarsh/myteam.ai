@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "export NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
-    "build": "export NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
-    "test": "react-scripts test",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "npx cypress run --spec cypress/e2e/**/*.feature",
     "eject": "react-scripts eject"
   },
   "dependencies": {
@@ -18,8 +18,11 @@
     "react-scripts": "4.0.3"
   },
   "devDependencies": {
+    "@badeball/cypress-cucumber-preprocessor": "^22.0.1",
+    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.4",
     "@types/react": "^17.0.2",
     "@types/react-dom": "^17.0.2",
+    "cypress": "^14.0.2",
     "typescript": "^4.1.2"
   },
   "eslintConfig": {
@@ -39,5 +42,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "cypress-cucumber-preprocessor": {
+    "stepDefinitions": "cypress/e2e/**/*.ts"
   }
 }
