@@ -65,8 +65,22 @@ def step_impl(context):
 
 @when('I delete that member')
 def step_impl(context):
+    # Create an admin user first
+    admin_response = requests.post(
+        f'{context.base_url}/api/v1/members/',
+        json={
+            "first_name": "Admin",
+            "last_name": "User",
+            "email": "admin@example.com",
+            "phone_no": "1234567890",
+            "role": "Admin"
+        }
+    )
+    
+    # Delete as admin
     context.response = requests.delete(
-        f'{context.base_url}/api/v1/members/{context.member_id}/'
+        f'{context.base_url}/api/v1/members/{context.member_id}/',
+        headers={'X-User-Email': 'admin@example.com'}
     )
 
 @then('I should get a no content response')
@@ -79,3 +93,53 @@ def step_impl(context):
         f'{context.base_url}/api/v1/members/{context.member_id}/'
     )
     assert response.status_code == 404
+
+@given('there is an admin user with email "{email}"')
+def step_impl(context, email):
+    response = requests.post(
+        f'{context.base_url}/api/v1/members/',
+        json={
+            "first_name": "Admin",
+            "last_name": "User",
+            "email": email,
+            "phone_no": "1234567890",
+            "role": "Admin"
+        }
+    )
+    context.admin_id = response.json()['id']
+
+@given('there is a regular user with email "{email}"')
+def step_impl(context, email):
+    response = requests.post(
+        f'{context.base_url}/api/v1/members/',
+        json={
+            "first_name": "Regular",
+            "last_name": "User",
+            "email": email,
+            "phone_no": "0987654321",
+            "role": "Regular"
+        }
+    )
+    context.regular_id = response.json()['id']
+
+@when('the admin tries to delete the regular user')
+def step_impl(context):
+    context.response = requests.delete(
+        f'{context.base_url}/api/v1/members/{context.regular_id}/',
+        headers={'X-User-Email': 'admin@example.com'}
+    )
+
+@when('the regular user tries to delete the admin')
+def step_impl(context):
+    context.response = requests.delete(
+        f'{context.base_url}/api/v1/members/{context.admin_id}/',
+        headers={'X-User-Email': 'regular@example.com'}
+    )
+
+@then('the deletion should be successful')
+def step_impl(context):
+    assert context.response.status_code == 204
+
+@then('the deletion should be forbidden')
+def step_impl(context):
+    assert context.response.status_code == 403

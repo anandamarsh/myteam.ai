@@ -53,6 +53,13 @@ class TeamMemberViewSet(viewsets.ViewSet):
     def destroy(self, request, pk=None):
         try:
             member = TeamMember.objects.get(pk=pk)
+            # Check if user making request is admin
+            requesting_member = TeamMember.objects.get(email=request.headers.get('X-User-Email', ''))
+            if requesting_member.role != 'Admin':
+                return Response(
+                    {"error": "Only admins can delete members"}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
             member.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except TeamMember.DoesNotExist:

@@ -1,27 +1,47 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Typography from "@mui/material/Typography";
 import Member from "./Member";
-import teamMembers, { TeamMember } from "../types/TeamMember";
 import MemberDetails from "./MemberDetails";
-import { StyledFab } from "./styled";
+import { TeamMember } from "../types/TeamMember";
+import { api } from "../services/api";
 import AddIcon from "@mui/icons-material/Add";
+import { StyledFab } from "./styled";
 
 const App: React.FC = () => {
-  const [showMemberDetails, setShowMemberDetails] = useState(false);
+  const [currentView, setCurrentView] = useState<"list" | "details">("list");
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [members, setMembers] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleMemberClick = (member: TeamMember) => {
-    setSelectedMember(member);
-    setShowMemberDetails(true);
+  useEffect(() => {
+    loadMembers();
+  }, []);
+
+  const loadMembers = async () => {
+    try {
+      const data = await api.getMembers();
+      setMembers(data);
+      setError(null);
+    } catch (err) {
+      setError("Failed to load team members");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (showMemberDetails) {
+  if (loading) return <Typography>Loading...</Typography>;
+  if (error) return <Typography color="error">{error}</Typography>;
+
+  if (currentView === "details") {
     return (
       <MemberDetails
         member={selectedMember}
         onClose={() => {
-          setShowMemberDetails(false);
+          setCurrentView("list");
           setSelectedMember(null);
+          loadMembers();
         }}
       />
     );
@@ -31,21 +51,24 @@ const App: React.FC = () => {
     <div style={{ margin: "1rem" }}>
       <Typography variant="h5">Team Members</Typography>
       <Typography variant="h6">
-        You have {teamMembers.length} team members
+        You have {members.length} team members
       </Typography>
       <div style={{ marginTop: "2rem" }}>
-        {teamMembers.map((member: TeamMember, index: number) => (
+        {members.map((member) => (
           <Member
-            key={index}
+            key={member.id}
             member={member}
-            onClick={() => handleMemberClick(member)}
+            onClick={() => {
+              setSelectedMember(member);
+              setCurrentView("details");
+            }}
           />
         ))}
       </div>
       <StyledFab
         onClick={() => {
           setSelectedMember(null);
-          setShowMemberDetails(true);
+          setCurrentView("details");
         }}
       >
         <AddIcon />

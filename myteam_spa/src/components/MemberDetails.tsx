@@ -1,153 +1,162 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
-  Typography,
+  Button,
   TextField,
-  Radio,
+  Typography,
   RadioGroup,
   FormControlLabel,
+  Radio,
   FormControl,
   FormLabel,
-  Button,
-  Box,
-  Container,
 } from "@mui/material";
 import { TeamMember } from "../types/TeamMember";
+import { api } from "../services/api";
 
-interface MemberDetailsProps {
+interface Props {
   member?: TeamMember | null;
   onClose: () => void;
 }
 
-const MemberDetails: React.FC<MemberDetailsProps> = ({ member, onClose }) => {
+const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNo: "",
-    role: "regular",
+    firstName: member?.firstName || "",
+    lastName: member?.lastName || "",
+    email: member?.email || "",
+    phoneNo: member?.phoneNo || "",
+    role: member?.role || "Regular",
   });
 
-  useEffect(() => {
-    if (member) {
-      setFormData({
-        ...member,
-        role: member.role.toLowerCase(),
-      });
-    }
-  }, [member]);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log(formData);
-    onClose();
+    try {
+      if (member) {
+        await api.updateMember(member.id, formData);
+      } else {
+        await api.createMember(formData);
+      }
+      onClose();
+    } catch (error) {
+      console.error("Failed to save member:", error);
+    }
   };
-
-  const handleDelete = () => {
-    // Handle delete here
-    console.log("Deleting member:", member);
-    onClose();
-  };
-
-  const isEditing = Boolean(member);
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          {isEditing ? "Edit Team Member" : "Add a team member"}
-        </Typography>
-        <Typography variant="subtitle1" gutterBottom>
-          {isEditing
-            ? "Edit contact Info, location and role"
-            : "Set Email, location and role"}
-        </Typography>
-
-        <form onSubmit={handleSubmit}>
-          <Box sx={{ mt: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Info
-            </Typography>
-            <TextField
-              fullWidth
-              label="First Name"
-              margin="normal"
-              value={formData.firstName}
-              onChange={(e) =>
-                setFormData({ ...formData, firstName: e.target.value })
-              }
+    <div style={{ margin: "1rem" }}>
+      <Typography variant="h5" gutterBottom>
+        {member ? "Edit team member" : "Add a team member"}
+      </Typography>
+      <Typography variant="h6" gutterBottom>
+        {member
+          ? "Edit contact info, location and role"
+          : "Set email, location and role"}
+      </Typography>
+      <hr
+        style={{
+          margin: "2rem 0",
+          border: "none",
+          borderTop: "1px solid #ddd",
+        }}
+      />
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem",
+          maxWidth: "500px",
+        }}
+      >
+        <TextField
+          autoFocus
+          label="First Name"
+          fullWidth
+          value={formData.firstName}
+          onChange={(e) =>
+            setFormData({ ...formData, firstName: e.target.value })
+          }
+        />
+        <TextField
+          label="Last Name"
+          fullWidth
+          value={formData.lastName}
+          onChange={(e) =>
+            setFormData({ ...formData, lastName: e.target.value })
+          }
+        />
+        <TextField
+          label="Email"
+          type="email"
+          fullWidth
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+        />
+        <TextField
+          label="Phone Number"
+          fullWidth
+          value={formData.phoneNo}
+          onChange={(e) =>
+            setFormData({ ...formData, phoneNo: e.target.value })
+          }
+        />
+        <FormControl>
+          <FormLabel>Role</FormLabel>
+          <RadioGroup
+            value={formData.role}
+            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+          >
+            <FormControlLabel
+              value="Regular"
+              control={<Radio />}
+              label="Regular - Can't delete members"
             />
-            <TextField
-              fullWidth
-              label="Last Name"
-              margin="normal"
-              value={formData.lastName}
-              onChange={(e) =>
-                setFormData({ ...formData, lastName: e.target.value })
-              }
+            <FormControlLabel
+              value="Admin"
+              control={<Radio />}
+              label="Admin - Can delete members"
             />
-            <TextField
-              fullWidth
-              label="Email"
-              type="email"
-              margin="normal"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-            />
-            <TextField
-              fullWidth
-              label="Phone Number"
-              margin="normal"
-              value={formData.phoneNo}
-              onChange={(e) =>
-                setFormData({ ...formData, phoneNo: e.target.value })
-              }
-            />
-          </Box>
-
-          <Box sx={{ mt: 4 }}>
-            <FormControl component="fieldset">
-              <FormLabel component="legend">Role</FormLabel>
-              <RadioGroup
-                value={formData.role}
-                onChange={(e) =>
-                  setFormData({ ...formData, role: e.target.value })
-                }
+          </RadioGroup>
+        </FormControl>
+        <div
+          style={{
+            display: "flex",
+            gap: "1rem",
+            marginTop: "1rem",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>
+            {member && (
+              <Button
+                variant="contained"
+                color="error"
+                onClick={async () => {
+                  try {
+                    await api.deleteMember(member.id, member.email);
+                    onClose();
+                  } catch (error) {
+                    alert(
+                      error instanceof Error
+                        ? error.message
+                        : "Failed to delete member"
+                    );
+                  }
+                }}
               >
-                <FormControlLabel
-                  value="user"
-                  control={<Radio />}
-                  label="Regular - can't delete members"
-                />
-                <FormControlLabel
-                  value="admin"
-                  control={<Radio />}
-                  label="Admin - can delete members"
-                />
-              </RadioGroup>
-            </FormControl>
-          </Box>
-
-          <Box sx={{ mt: 4, display: "flex", justifyContent: "space-between" }}>
-            {isEditing && (
-              <Button variant="outlined" color="error" onClick={handleDelete}>
                 Delete
               </Button>
             )}
-            <Box sx={{ display: "flex", gap: 2, marginLeft: "auto" }}>
-              <Button variant="outlined" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button variant="contained" color="primary" type="submit">
-                Save
-              </Button>
-            </Box>
-          </Box>
-        </form>
-      </Box>
-    </Container>
+          </div>
+          <div style={{ display: "flex", gap: "1rem" }}>
+            <Button onClick={onClose} variant="outlined">
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" color="primary">
+              Save
+            </Button>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 };
 

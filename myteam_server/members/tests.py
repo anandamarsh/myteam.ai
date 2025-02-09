@@ -1,5 +1,6 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
+from .models import TeamMember
 
 # Create your tests here.
 
@@ -14,6 +15,24 @@ class TeamMemberTests(APITestCase):
             "phone_no": "1234567890",
             "role": "Admin"
         }
+
+        # Create an admin user
+        self.admin = TeamMember.objects.create(
+            first_name="Admin",
+            last_name="User",
+            email="admin@example.com",
+            phone_no="1234567890",
+            role="Admin"
+        )
+        
+        # Create a regular user
+        self.regular = TeamMember.objects.create(
+            first_name="Regular",
+            last_name="User",
+            email="regular@example.com",
+            phone_no="0987654321",
+            role="Regular"
+        )
 
     def test_list_members(self):
         """Test getting list of members"""
@@ -62,8 +81,11 @@ class TeamMemberTests(APITestCase):
         create_response = self.client.post(self.base_url, self.test_member, format='json')
         member_id = create_response.data['id']
 
-        # Delete the member
-        response = self.client.delete(f'{self.base_url}{member_id}/')
+        # Delete the member (as admin)
+        response = self.client.delete(
+            f'{self.base_url}{member_id}/',
+            HTTP_X_USER_EMAIL=self.admin.email
+        )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # Verify member is deleted
@@ -79,3 +101,19 @@ class TeamMemberTests(APITestCase):
         """Test deleting a member that doesn't exist"""
         response = self.client.delete(f'{self.base_url}999/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_admin_can_delete_member(self):
+        """Test that admin can delete members"""
+        response = self.client.delete(
+            f'/api/v1/members/{self.regular.id}/',
+            HTTP_X_USER_EMAIL=self.admin.email
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_regular_cannot_delete_member(self):
+        """Test that regular users cannot delete members"""
+        response = self.client.delete(
+            f'/api/v1/members/{self.admin.id}/',
+            HTTP_X_USER_EMAIL=self.regular.email
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

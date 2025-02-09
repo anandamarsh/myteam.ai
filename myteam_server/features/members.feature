@@ -26,3 +26,15 @@ Feature: Team Member Management
         When I delete that member
         Then I should get a no content response
         And that member should no longer exist
+
+    Scenario: Admin can delete a team member
+        Given there is an admin user with email "admin@example.com"
+        And there is a regular user with email "regular@example.com"
+        When the admin tries to delete the regular user
+        Then the deletion should be successful
+
+    Scenario: Regular user cannot delete a team member
+        Given there is an admin user with email "admin@example.com"
+        And there is a regular user with email "regular@example.com"
+        When the regular user tries to delete the admin
+        Then the deletion should be forbidden
