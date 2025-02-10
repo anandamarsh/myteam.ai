@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "npx cypress run --spec cypress/e2e/**/*.feature",
+    "start": "NODE_OPTIONS='--openssl-legacy-provider' react-scripts start",
+    "build": "NODE_OPTIONS='--openssl-legacy-provider' react-scripts build",
+    "test": "cypress run --spec \"cypress/e2e/**/*.feature\"",
     "eject": "react-scripts eject"
   },
   "dependencies": {
