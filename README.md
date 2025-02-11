@@ -1,5 +1,7 @@
 # Demo
 
+**Click on the image below to watch a video demo**
+
 [![Watch the demo video](https://img.youtube.com/vi/PiNw4NcjD5E/0.jpg)](https://youtu.be/PiNw4NcjD5E)
 
 > 🚀 **Note**  
