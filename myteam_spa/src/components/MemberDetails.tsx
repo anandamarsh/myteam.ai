@@ -11,13 +11,27 @@ import {
 } from "@mui/material";
 import { TeamMember } from "../types/TeamMember";
 import { api } from "../services/api";
+import { Notification } from "../types/Notification";
+import NotificationAlert from "./NotificationAlert";
 
 interface Props {
   member?: TeamMember | null;
   onClose: (wasModified?: boolean) => void;
+  onNotification: (notification: Notification) => void;
 }
 
-const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
+interface FormErrors {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phoneNo?: string;
+}
+
+const MemberDetails: React.FC<Props> = ({
+  member,
+  onClose,
+  onNotification,
+}) => {
   const [formData, setFormData] = useState({
     firstName: member?.firstName || "",
     lastName: member?.lastName || "",
@@ -26,17 +40,103 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
     role: member?.role || "Regular",
   });
 
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [notification, setNotification] = useState<Notification | null>(null);
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+    let isValid = true;
+
+    // First Name validation
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "First name is required";
+      isValid = false;
+    }
+
+    // Last Name validation
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Last name is required";
+      isValid = false;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+      isValid = false;
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+      isValid = false;
+    }
+
+    // Phone number validation
+    const phoneRegex = /^\d{10}$/;
+    if (!formData.phoneNo.trim()) {
+      newErrors.phoneNo = "Phone number is required";
+      isValid = false;
+    } else if (!phoneRegex.test(formData.phoneNo)) {
+      newErrors.phoneNo = "Phone number must be exactly 10 digits";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      setNotification({
+        type: "error",
+        message: "Please fix the errors in the form",
+      });
+      return;
+    }
+
     try {
       if (member) {
         await api.updateMember(member.id, formData);
+        onNotification({
+          type: "success",
+          message: "Member updated successfully",
+        });
+        onClose(true);
       } else {
         await api.createMember(formData);
+        onNotification({
+          type: "success",
+          message: "New member created successfully",
+        });
+        onClose(true);
       }
+    } catch (error) {
+      console.error("Save error:", error);
+      setNotification({
+        type: "error",
+        message:
+          error instanceof Error ? error.message : "Failed to save member",
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!member) return;
+
+    try {
+      await api.deleteMember(member.id, member.email);
+      onNotification({
+        type: "success",
+        message: "Member deleted successfully",
+      });
       onClose(true);
     } catch (error) {
-      console.error("Failed to save member:", error);
+      console.error("Delete error:", error);
+      setNotification({
+        type: "error",
+        message:
+          error instanceof Error ? error.message : "Failed to delete member",
+      });
     }
   };
 
@@ -72,36 +172,55 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
           label="First Name"
           fullWidth
           value={formData.firstName}
-          onChange={(e) =>
-            setFormData({ ...formData, firstName: e.target.value })
-          }
+          onChange={(e) => {
+            setFormData({ ...formData, firstName: e.target.value });
+            setErrors({ ...errors, firstName: undefined });
+          }}
+          error={!!errors.firstName}
+          helperText={errors.firstName}
           data-testid="firstName-input"
+          margin="normal"
         />
         <TextField
           label="Last Name"
           fullWidth
           value={formData.lastName}
-          onChange={(e) =>
-            setFormData({ ...formData, lastName: e.target.value })
-          }
+          onChange={(e) => {
+            setFormData({ ...formData, lastName: e.target.value });
+            setErrors({ ...errors, lastName: undefined });
+          }}
+          error={!!errors.lastName}
+          helperText={errors.lastName}
           data-testid="lastName-input"
+          margin="normal"
         />
         <TextField
           label="Email"
           type="email"
           fullWidth
           value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          onChange={(e) => {
+            setFormData({ ...formData, email: e.target.value });
+            setErrors({ ...errors, email: undefined });
+          }}
+          error={!!errors.email}
+          helperText={errors.email}
           data-testid="email-input"
+          margin="normal"
         />
         <TextField
           label="Phone Number"
           fullWidth
           value={formData.phoneNo}
-          onChange={(e) =>
-            setFormData({ ...formData, phoneNo: e.target.value })
-          }
+          onChange={(e) => {
+            setFormData({ ...formData, phoneNo: e.target.value });
+            setErrors({ ...errors, phoneNo: undefined });
+          }}
+          error={!!errors.phoneNo}
+          helperText={errors.phoneNo}
           data-testid="phoneNo-input"
+          margin="normal"
+          placeholder="10 digit number"
         />
         <FormControl>
           <FormLabel>Role</FormLabel>
@@ -135,18 +254,7 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
                 variant="contained"
                 color="error"
                 data-testid="delete-button"
-                onClick={async () => {
-                  try {
-                    await api.deleteMember(member.id, member.email);
-                    onClose(true);
-                  } catch (error) {
-                    alert(
-                      error instanceof Error
-                        ? error.message
-                        : "Failed to delete member"
-                    );
-                  }
-                }}
+                onClick={handleDelete}
               >
                 Delete
               </Button>
@@ -165,12 +273,18 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
               variant="contained"
               color="primary"
               data-testid="save-button"
+              onClick={handleSubmit}
             >
               Save
             </Button>
           </div>
         </div>
       </form>
+
+      <NotificationAlert
+        notification={notification}
+        onClose={() => setNotification(null)}
+      />
     </div>
   );
 };

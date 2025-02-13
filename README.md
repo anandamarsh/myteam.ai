@@ -35,6 +35,7 @@ python3 manage.py runserver
 
 ```bash
 # from myteam_server directory
+source venv/bin/activate
 python3 manage.py test
 python3 manage.py behave
 ```

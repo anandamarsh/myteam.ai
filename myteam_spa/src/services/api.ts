@@ -18,13 +18,31 @@ const transformMemberToAPI = (member: Omit<TeamMember, "id">) => ({
   role: member.role,
 });
 
+const handleApiError = async (response: Response, defaultMessage: string) => {
+  try {
+    const data = await response.json();
+    if (data.email) {
+      throw new Error(data.email[0]);
+    }
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    throw new Error(defaultMessage);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(defaultMessage);
+  }
+};
+
 export const api = {
   async getMembers(): Promise<TeamMember[]> {
     const response = await fetch(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.MEMBERS}`
     );
     if (!response.ok) {
-      throw new Error("Failed to fetch members");
+      await handleApiError(response, "Failed to fetch members");
     }
     const data = await response.json();
     return data.map(transformMemberFromAPI);
@@ -44,7 +62,7 @@ export const api = {
     );
 
     if (!response.ok) {
-      throw new Error("Failed to create member");
+      await handleApiError(response, "Failed to create member");
     }
 
     const data = await response.json();
@@ -66,7 +84,7 @@ export const api = {
       }
     );
     if (!response.ok) {
-      throw new Error("Failed to update member");
+      await handleApiError(response, "Failed to update member");
     }
     const data = await response.json();
     return transformMemberFromAPI(data);
@@ -85,10 +103,7 @@ export const api = {
       }
     );
     if (!response.ok) {
-      if (response.status === 403) {
-        throw new Error("Only admins can delete members");
-      }
-      throw new Error("Failed to delete member");
+      await handleApiError(response, "Failed to delete member");
     }
   },
 };
