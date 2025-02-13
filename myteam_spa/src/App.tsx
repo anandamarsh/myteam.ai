@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import Typography from "@mui/material/Typography";
-import Alert from "@mui/material/Alert";
-import Snackbar from "@mui/material/Snackbar";
 import Member from "./components/Member";
 import MemberDetails from "./components/MemberDetails";
 import { TeamMember } from "./types/TeamMember";
@@ -16,10 +14,6 @@ const App: React.FC = () => {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [notification, setNotification] = useState<Notification | null>(null);
   const { members, loading, error, loadMembers } = useMembers();
-
-  const handleCloseNotification = () => {
-    setNotification(null);
-  };
 
   // Create a shared notification handler
   const showNotification = (notification: Notification) => {
