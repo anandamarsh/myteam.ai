@@ -1,40 +1,56 @@
 Feature: Team Member Management
-    As an API user
-    I want to manage team members
-    So that I can maintain the team roster
 
-    Scenario: List all team members
-        When I request all team members
-        Then I should get a successful response
-        And I should get a list of members
+  Scenario: Create a new team member
+    Given I have the following member details:
+      | first_name | last_name | email           | phone_no   | role    | location    | interests        | info                    |
+      | John       | Doe       | john@email.com  | 1234567890 | Regular | New York    | Python, Django   | Full stack developer    |
+    When I send a POST request to create the member
+    Then the response status code should be 201
+    And the response should contain the member details
 
-    Scenario: Create a new team member
-        When I create a new member with following details:
-            | first_name | last_name | email              | phone_no   | role  |
-            | John       | Doe       | john@example.com   | 1234567890 | Admin |
-        Then I should get a created response
-        And the member should have correct details
+  Scenario: Get all team members
+    Given the following team members exist:
+      | first_name | last_name | email            | phone_no   | role    | location    | interests        | info                    |
+      | John       | Doe       | john@email.com   | 1234567890 | Regular | New York    | Python, Django   | Full stack developer    |
+      | Jane       | Smith     | jane@email.com   | 0987654321 | Admin   | London      | React, Node.js   | Frontend specialist     |
+    When I send a GET request to fetch all members
+    Then the response status code should be 200
+    And the response should contain 2 members
 
-    Scenario: Get a specific team member
-        Given there is an existing team member
-        When I request that specific member
-        Then I should get a successful response
-        And I should see the member details
+  Scenario: Get a specific team member
+    Given the following team member exists:
+      | first_name | last_name | email           | phone_no   | role    | location    | interests        | info                    |
+      | John       | Doe       | john@email.com  | 1234567890 | Regular | New York    | Python, Django   | Full stack developer    |
+    When I send a GET request to fetch the member
+    Then the response status code should be 200
+    And the response should contain the member details
 
-    Scenario: Delete a team member
-        Given there is an existing team member
-        When I delete that member
-        Then I should get a no content response
-        And that member should no longer exist
+  Scenario: Update a team member
+    Given the following team member exists:
+      | first_name | last_name | email           | phone_no   | role    | location    | interests        | info                    |
+      | John       | Doe       | john@email.com  | 1234567890 | Regular | New York    | Python, Django   | Full stack developer    |
+    When I update the member with the following details:
+      | first_name | last_name | email            | phone_no   | role    | location    | interests        | info                    |
+      | John       | Smith     | john@email.com   | 1234567890 | Admin   | London      | React, AWS      | Senior developer        |
+    Then the response status code should be 200
+    And the response should contain the updated details
 
-    Scenario: Admin can delete a team member
-        Given there is an admin user with email "admin@example.com"
-        And there is a regular user with email "regular@example.com"
-        When the admin tries to delete the regular user
-        Then the deletion should be successful
+  Scenario: Delete a team member
+    Given the following team member exists:
+      | first_name | last_name | email           | phone_no   | role    | location    | interests        | info                    |
+      | John       | Doe       | john@email.com  | 1234567890 | Regular | New York    | Python, Django   | Full stack developer    |
+    When I send a DELETE request for the member
+    Then the response status code should be 204
+    And the member should be deleted
+    When I send a GET request to fetch the member
+    Then the response status code should be 404
 
-    Scenario: Regular user cannot delete a team member
-        Given there is an admin user with email "admin@example.com"
-        And there is a regular user with email "regular@example.com"
-        When the regular user tries to delete the admin
-        Then the deletion should be forbidden
+  Scenario: Try to create a member with duplicate email
+    Given the following team member exists:
+      | first_name | last_name | email           | phone_no   | role    | location    | interests        | info                    |
+      | John       | Doe       | john@email.com  | 1234567890 | Regular | New York    | Python, Django   | Full stack developer    |
+    When I create another member with the following details:
+      | first_name | last_name | email           | phone_no   | role    | location    | interests        | info                    |
+      | Jane       | Smith     | john@email.com  | 0987654321 | Regular | London      | React, Node.js   | Frontend developer      |
+    Then the response status code should be 400
+    And the response should contain email uniqueness error

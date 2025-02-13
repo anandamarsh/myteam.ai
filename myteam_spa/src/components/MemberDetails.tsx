@@ -19,11 +19,14 @@ interface Props {
 
 const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
   const [formData, setFormData] = useState({
-    firstName: member?.firstName || "",
-    lastName: member?.lastName || "",
+    first_name: member?.first_name || "",
+    last_name: member?.last_name || "",
     email: member?.email || "",
-    phoneNo: member?.phoneNo || "",
+    phone_no: member?.phone_no || "",
     role: member?.role || "Regular",
+    location: member?.location || "",
+    interests: member?.interests || "",
+    info: member?.info || "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,18 +74,18 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
           autoFocus
           label="First Name"
           fullWidth
-          value={formData.firstName}
+          value={formData.first_name}
           onChange={(e) =>
-            setFormData({ ...formData, firstName: e.target.value })
+            setFormData({ ...formData, first_name: e.target.value })
           }
           data-testid="firstName-input"
         />
         <TextField
           label="Last Name"
           fullWidth
-          value={formData.lastName}
+          value={formData.last_name}
           onChange={(e) =>
-            setFormData({ ...formData, lastName: e.target.value })
+            setFormData({ ...formData, last_name: e.target.value })
           }
           data-testid="lastName-input"
         />
@@ -97,11 +100,40 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
         <TextField
           label="Phone Number"
           fullWidth
-          value={formData.phoneNo}
+          value={formData.phone_no}
           onChange={(e) =>
-            setFormData({ ...formData, phoneNo: e.target.value })
+            setFormData({ ...formData, phone_no: e.target.value })
           }
           data-testid="phoneNo-input"
+        />
+        <TextField
+          label="Location"
+          fullWidth
+          value={formData.location}
+          onChange={(e) =>
+            setFormData({ ...formData, location: e.target.value })
+          }
+          data-testid="location-input"
+        />
+        <TextField
+          label="Interests"
+          fullWidth
+          multiline
+          rows={2}
+          value={formData.interests}
+          onChange={(e) =>
+            setFormData({ ...formData, interests: e.target.value })
+          }
+          data-testid="interests-input"
+        />
+        <TextField
+          label="Additional Information"
+          fullWidth
+          multiline
+          rows={3}
+          value={formData.info}
+          onChange={(e) => setFormData({ ...formData, info: e.target.value })}
+          data-testid="info-input"
         />
         <FormControl>
           <FormLabel>Role</FormLabel>
@@ -137,7 +169,7 @@ const MemberDetails: React.FC<Props> = ({ member, onClose }) => {
                 data-testid="delete-button"
                 onClick={async () => {
                   try {
-                    await api.deleteMember(member.id, member.email);
+                    await api.deleteMember(member.id);
                     onClose(true);
                   } catch (error) {
                     alert(

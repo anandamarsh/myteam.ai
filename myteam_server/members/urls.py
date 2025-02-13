@@ -1,7 +1,7 @@
-from rest_framework.routers import DefaultRouter
-from .views import TeamMemberViewSet
+from django.urls import path
+from . import views
 
-router = DefaultRouter()
-router.register('', TeamMemberViewSet, basename='members')
-
-urlpatterns = router.urls
+urlpatterns = [
+    path('api/v1/members/', views.TeamMemberList.as_view(), name='member-list'),
+    path('api/v1/members/<int:pk>/', views.TeamMemberDetail.as_view(), name='member-detail'),
+]

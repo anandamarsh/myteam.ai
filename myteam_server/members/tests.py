@@ -1,3 +1,4 @@
+from django.test import TestCase
 from rest_framework.test import APITestCase
 from rest_framework import status
 from .models import TeamMember
@@ -8,13 +9,16 @@ class TeamMemberTests(APITestCase):
     def setUp(self):
         # This runs before each test
         self.base_url = '/api/v1/members/'
-        self.test_member = {
-            "first_name": "John",
-            "last_name": "Doe",
-            "email": "john@example.com",
-            "phone_no": "1234567890",
-            "role": "Admin"
-        }
+        self.test_member = TeamMember.objects.create(
+            first_name="John",
+            last_name="Doe",
+            email="john@example.com",
+            phone_no="1234567890",
+            role="Regular",
+            location="New York",
+            interests="Python, Django, React",
+            info="Full stack developer with 5 years of experience"
+        )
 
         # Create an admin user
         self.admin = TeamMember.objects.create(
@@ -33,6 +37,25 @@ class TeamMemberTests(APITestCase):
             phone_no="0987654321",
             role="Regular"
         )
+
+        self.valid_payload = {
+            'first_name': 'Jane',
+            'last_name': 'Smith',
+            'email': 'jane@example.com',
+            'phone_no': '0987654321',
+            'role': 'Regular',
+            'location': 'San Francisco',
+            'interests': 'JavaScript, Node.js',
+            'info': 'Backend developer'
+        }
+
+        self.invalid_payload = {
+            'first_name': '',
+            'last_name': '',
+            'email': 'not-an-email',
+            'phone_no': '',
+            'role': 'Invalid'
+        }
 
     def test_list_members(self):
         """Test getting list of members"""
@@ -117,3 +140,59 @@ class TeamMemberTests(APITestCase):
             HTTP_X_USER_EMAIL=self.regular.email
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_create_valid_member(self):
+        response = self.client.post('/api/members/', self.valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(TeamMember.objects.count(), 2)
+        self.assertEqual(response.data['location'], 'San Francisco')
+        self.assertEqual(response.data['interests'], 'JavaScript, Node.js')
+        self.assertEqual(response.data['info'], 'Backend developer')
+
+    def test_create_member_with_optional_fields(self):
+        payload = {
+            'first_name': 'Alice',
+            'last_name': 'Johnson',
+            'email': 'alice@example.com',
+            'phone_no': '1122334455',
+            'role': 'Regular'
+            # Omitting optional fields: location, interests, info
+        }
+        response = self.client.post('/api/members/', payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIsNone(response.data['location'])
+        self.assertIsNone(response.data['interests'])
+        self.assertIsNone(response.data['info'])
+
+    def test_get_member_details(self):
+        response = self.client.get(f'/api/members/{self.test_member.id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['location'], 'New York')
+        self.assertEqual(response.data['interests'], 'Python, Django, React')
+        self.assertEqual(response.data['info'], 'Full stack developer with 5 years of experience')
+
+    def test_update_member_new_fields(self):
+        update_payload = {
+            'location': 'London',
+            'interests': 'AWS, Docker',
+            'info': 'Updated profile information'
+        }
+        response = self.client.patch(
+            f'/api/members/{self.test_member.id}/',
+            update_payload,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['location'], 'London')
+        self.assertEqual(response.data['interests'], 'AWS, Docker')
+        self.assertEqual(response.data['info'], 'Updated profile information')
+
+    def test_field_max_lengths(self):
+        # Test maximum length constraints
+        long_string = 'a' * 201  # location max_length is 200
+        payload = self.valid_payload.copy()
+        payload['location'] = long_string
+        
+        response = self.client.post('/api/members/', payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('location', response.data)

@@ -18,10 +18,10 @@ const Member: React.FC<MemberProps> = ({ member, onClick }) => {
       </StyledAvatar>
       <CardContent>
         <Typography variant="h6">
-          {member.firstName} {member.lastName}
+          {member.first_name} {member.last_name}
         </Typography>
         <Typography variant="body2" color="textSecondary">
-          {member.phoneNo}
+          {member.phone_no}
         </Typography>
         <Typography variant="body2" color="textSecondary">
           {member.email}

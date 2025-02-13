@@ -1,8 +1,11 @@
 export interface TeamMember {
   id: number;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  phoneNo: string;
-  role: string;
+  phone_no: string;
+  role: "Regular" | "Admin";
+  location: string;
+  interests: string;
+  info: string;
 }

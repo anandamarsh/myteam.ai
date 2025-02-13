@@ -1,16 +1,15 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.response import Response
 from .models import TeamMember
 from .serializers import TeamMemberSerializer
+from rest_framework.decorators import api_view
 
 # Create your views here.
 
-class TeamMemberViewSet(viewsets.ViewSet):
-    def list(self, request):
-        queryset = TeamMember.objects.all()
-        serializer = TeamMemberSerializer(queryset, many=True)
-        return Response(serializer.data)
+class TeamMemberViewSet(viewsets.ModelViewSet):
+    queryset = TeamMember.objects.all()
+    serializer_class = TeamMemberSerializer
 
     def retrieve(self, request, pk=None):
         try:
@@ -52,3 +51,20 @@ class TeamMemberViewSet(viewsets.ViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except TeamMember.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+# If using function-based views
+@api_view(['POST'])
+def create_member(request):
+    serializer = TeamMemberSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TeamMemberList(generics.ListCreateAPIView):
+    queryset = TeamMember.objects.all()
+    serializer_class = TeamMemberSerializer
+
+class TeamMemberDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = TeamMember.objects.all()
+    serializer_class = TeamMemberSerializer

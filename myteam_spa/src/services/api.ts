@@ -1,37 +1,24 @@
-import { API_CONFIG } from "../config";
 import { TeamMember } from "../types/TeamMember";
-
-const transformMemberFromAPI = (data: any): TeamMember => ({
-  id: data.id,
-  firstName: data.first_name,
-  lastName: data.last_name,
-  email: data.email,
-  phoneNo: data.phone_no,
-  role: data.role,
-});
-
-const transformMemberToAPI = (member: Omit<TeamMember, "id">) => ({
-  first_name: member.firstName,
-  last_name: member.lastName,
-  email: member.email,
-  phone_no: member.phoneNo,
-  role: member.role,
-});
+import { API_CONFIG } from "../config";
 
 export const api = {
-  async getMembers(): Promise<TeamMember[]> {
+  getMembers: async (): Promise<TeamMember[]> => {
     const response = await fetch(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.MEMBERS}`
     );
-    if (!response.ok) {
-      throw new Error("Failed to fetch members");
-    }
-    const data = await response.json();
-    return data.map(transformMemberFromAPI);
+    if (!response.ok) throw new Error("Failed to fetch members");
+    return response.json();
   },
 
-  async createMember(member: Omit<TeamMember, "id">): Promise<TeamMember> {
-    const apiData = transformMemberToAPI(member);
+  getMember: async (id: number): Promise<TeamMember> => {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.MEMBERS}${id}/`
+    );
+    if (!response.ok) throw new Error("Failed to fetch member");
+    return response.json();
+  },
+
+  createMember: async (member: Omit<TeamMember, "id">): Promise<TeamMember> => {
     const response = await fetch(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.MEMBERS}`,
       {
@@ -39,22 +26,17 @@ export const api = {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(apiData),
+        body: JSON.stringify(member),
       }
     );
-
-    if (!response.ok) {
-      throw new Error("Failed to create member");
-    }
-
-    const data = await response.json();
-    return transformMemberFromAPI(data);
+    if (!response.ok) throw new Error("Failed to create member");
+    return response.json();
   },
 
-  async updateMember(
+  updateMember: async (
     id: number,
-    member: Omit<TeamMember, "id">
-  ): Promise<TeamMember> {
+    member: Partial<TeamMember>
+  ): Promise<TeamMember> => {
     const response = await fetch(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.MEMBERS}${id}/`,
       {
@@ -62,33 +44,20 @@ export const api = {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(transformMemberToAPI(member)),
+        body: JSON.stringify(member),
       }
     );
-    if (!response.ok) {
-      throw new Error("Failed to update member");
-    }
-    const data = await response.json();
-    return transformMemberFromAPI(data);
+    if (!response.ok) throw new Error("Failed to update member");
+    return response.json();
   },
 
-  async deleteMember(id: number, userEmail: string): Promise<void> {
+  deleteMember: async (id: number): Promise<void> => {
     const response = await fetch(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.MEMBERS}${id}/`,
       {
         method: "DELETE",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          "X-User-Email": userEmail,
-        },
       }
     );
-    if (!response.ok) {
-      if (response.status === 403) {
-        throw new Error("Only admins can delete members");
-      }
-      throw new Error("Failed to delete member");
-    }
+    if (!response.ok) throw new Error("Failed to delete member");
   },
 };
