@@ -11,6 +11,49 @@
 
 MyTeam is a fullstack (React + Python / Django) app that helps you add / remove people into your team.
 
+# Installing and Running the app
+
+First run the server
+
+Install server dependencies
+
+```bash
+# from myteam_server directory
+python3 -m venv venv
+source venv/bin/activate
+pip3 install -r requirements.txt
+```
+
+Run the server
+
+```bash
+# from myteam_server directory
+python3 manage.py runserver
+```
+
+## Running the server tests
+
+```bash
+# from myteam_server directory
+python3 manage.py test
+python3 manage.py behave
+```
+
+And then run the client:
+
+```bash
+# from myteam_spa directory
+npm install
+npm run start
+```
+
+## Running the client tests
+
+```bash
+# from myteam_spa directory
+npm run test
+```
+
 # Frontend
 
 The frontend stack consists of:
@@ -49,34 +92,3 @@ I am using `sqlite3` for the database. The database is defined in the `models.py
 # Testing
 
 The app uses `Behave` BDD framework for testing. The tests are defined in the `features` directory. The tests are used to test the API endpoints.
-
-# Running the app
-
-First run the server
-
-```bash
-# from myteam_server directory
-python3 manage.py runserver
-```
-
-## Running the server tests
-
-```bash
-# from myteam_server directory
-python3 manage.py test
-python3 manage.py behave
-```
-
-And then run the client:
-
-```bash
-# from myteam_spa directory
-npm run start
-```
-
-## Running the client tests
-
-```bash
-# from myteam_spa directory
-npm run test
-```

@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: "http://127.0.0.1:8000",
+  BASE_URL: "https://29twyg-8000.csb.app",
   ENDPOINTS: {
     MEMBERS: "/api/v1/members/",
   },
