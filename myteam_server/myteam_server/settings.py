@@ -25,7 +25,12 @@ SECRET_KEY = 'django-insecure-)v=1fq*k-q%k*fepx!n@9s8^ogi^jc1ii^sa1ss76u-dw+^#yw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.csb.app',  # This allows all CodeSandbox subdomains
+    '29twyg-8000.csb.app',  # Your specific CodeSandbox domain
+]
 
 
 # Application definition
